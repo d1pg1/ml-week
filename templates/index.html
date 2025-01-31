@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regression Model Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+            padding-right: 40px;
+        }
+        .form-container input, .form-container button, .form-container  textarea{
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-container button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .progress-bar {
+            margin: 20px auto;
+            width: 100%;
+            height: 30px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar div {
+            height: 100%;
+            background-color: #4caf50;
+            width: 0%;
+            transition: width 0.3s ease-in-out;
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+        .form-row .col {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Regression Model Prediction</h2>
+        <form action="/predict" method="post">
+            <div class="form-row">
+                <div class="col">
+                    <label for="title">Title:</label>
+                    <input 
+                        type="text" 
+                        id="title" 
+                        name="title" 
+                        placeholder="Enter title" 
+                        value="{{ input_data.title if input_data else '' }}" 
+                        required
+                    >
+                </div>
+                <div class="col">
+                    <label for="designation">Designation:</label>
+                    <input 
+                        type="text" 
+                        id="designation" 
+                        name="designation" 
+                        placeholder="Enter designation" 
+                        value="{{ input_data.designation if input_data else '' }}" 
+                    >
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <label for="description">Description:</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        placeholder="Enter description" 
+                        rows="4" 
+                        required
+                        style="resize: none;">{{ input_data.description if input_data else '' }}</textarea>
+                </div>
+                <div class="col">
+                    <label for="taster_name">Taster Name:</label>
+                    <input 
+                        type="text" 
+                        id="taster_name" 
+                        name="taster_name" 
+                        placeholder="Enter taster's name" 
+                        value="{{ input_data.taster_name if input_data else '' }}" 
+                        required
+                    >
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <label for="price">Price:</label>
+                    <input 
+                        type="number" 
+                        id="price" 
+                        name="price" 
+                        step="0.01" 
+                        placeholder="Enter price" 
+                        value="{{ input_data.price if input_data else '' }}" 
+                        required
+                    >
+                </div>
+                <div class="col">
+                    <label for="variety">Variety:</label>
+                    <input 
+                        type="text" 
+                        id="variety" 
+                        name="variety" 
+                        placeholder="Enter variety" 
+                        value="{{ input_data.variety if input_data else '' }}" 
+                        required
+                    >
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <label for="region_1">Region 1:</label>
+                    <input 
+                        type="text" 
+                        id="region_1" 
+                        name="region_1" 
+                        placeholder="Enter region 1" 
+                        value="{{ input_data.region_1 if input_data else '' }}" 
+                        required
+                    >
+                </div>
+                <div class="col">
+                    <label for="province">Province:</label>
+                    <input 
+                        type="text" 
+                        id="province" 
+                        name="province" 
+                        placeholder="Enter province" 
+                        value="{{ input_data.province if input_data else '' }}" 
+                        required
+                    >
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <label for="country">Country:</label>
+                    <input 
+                        type="text" 
+                        id="country" 
+                        name="country" 
+                        placeholder="Enter country" 
+                        value="{{ input_data.country if input_data else '' }}" 
+                        required
+                    >
+                </div>
+                <div class="col">
+                    <label for="winery">Winery:</label>
+                    <input 
+                        type="text" 
+                        id="winery" 
+                        name="winery" 
+                        placeholder="Enter winery" 
+                        value="{{ input_data.winery if input_data else '' }}" 
+                        required
+                    >
+                </div>
+            </div>
+            <button type="button" onclick="loadRandomData()">Load Random Data</button>
+
+            <button type="submit">Predict</button>
+        </form>
+        {% if prediction is not none %}
+            <div class="result">Prediction: {{ prediction }}</div>
+            <div class="progress-bar">
+                <div id="progress-bar-fill" style="width: 0%;"></div>
+                <script>
+                    // Set the progress bar width dynamically after the page loads
+                    const progressBarFill = document.getElementById('progress-bar-fill');
+                    const prediction = {{ (prediction / 100) * 100 if prediction is not none else 0 }};
+                    console.log(prediction + '%')
+                    if (progressBarFill) {
+                        setTimeout(() => {
+                            progressBarFill.style.width = prediction + '%';
+                        }, 100); // Delay by 100ms
+                    }
+                </script>                
+            </div>
+            <h3>SHAP Explanation:</h3>
+            <img src="data:image/png;base64,{{ shap_img }}" alt="SHAP Explanation">
+            
+        {% endif %}
+
+        {% if random_data %}
+            <script>
+                // JavaScript to load the random data into the form fields
+                document.getElementById('title').value = "{{ random_data.title }}";
+                document.getElementById('designation').value = "{{ random_data.designation }}";
+                document.getElementById('description').value = "{{ random_data.description }}";
+                document.getElementById('taster_name').value = "{{ random_data.taster_name }}";
+                document.getElementById('price').value = "{{ random_data.price }}";
+                document.getElementById('variety').value = "{{ random_data.variety }}";
+                document.getElementById('region_1').value = "{{ random_data.region_1 }}";
+                document.getElementById('province').value = "{{ random_data.province }}";
+                document.getElementById('country').value = "{{ random_data.country }}";
+                document.getElementById('winery').value = "{{ random_data.winery }}";
+            </script>
+        {% endif %}
+
+        <script>
+            // Function to load random data into the form fields via AJAX
+            function loadRandomData() {
+                window.location.href = '/get_random_data';  // The Flask route to get random data
+            }
+        </script>
+
+        {% if error %}
+            <div class="result error">Error: {{ error }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>
